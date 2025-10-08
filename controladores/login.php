@@ -3,8 +3,8 @@ session_start();
 include_once __DIR__ . '/../conexion/bd.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email']) && isset($_POST['password'])) {
-    $email = htmlspecialchars(trim($_POST['email']));
-    $password = htmlspecialchars(trim($_POST['password']));
+    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+    $password = trim($_POST['password']);
     $errores=[];
 
     // ---------------- VALIDACIONES ----------------
@@ -25,6 +25,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email']) && isset($_PO
         $usuario = $sql->fetch(PDO::FETCH_OBJ);
 
         if ($usuario && password_verify($password, $usuario->password)) {
+
+            session_regenerate_id(true); // Regenerar ID de sesión por seguridad
+
             $_SESSION['logueado'] = true;
             $_SESSION['id_usuario'] = $usuario->id;
             $_SESSION['email'] = $usuario->email;
@@ -50,6 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email']) && isset($_PO
         exit;
     }
 }else{
-    echo "Error en la solicitud";
+    $_SESSION['errores'] = "Error en la solicitud";
+    header("Location: ../login.php");
     exit;
 }

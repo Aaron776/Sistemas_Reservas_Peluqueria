@@ -537,7 +537,7 @@ if (session_status() === PHP_SESSION_NONE) { // Si no hay ninguna sesión activa
                     <span>Servicios</span>
                 </a>
             <?php } elseif ($_SESSION['rol'] == 'admin') { ?>
-                <a href="../admin/dash_admin.php" class="sidebar-menu-item active">
+                <a href="../admin/dash_admin.php" class="sidebar-menu-item">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
@@ -565,7 +565,7 @@ if (session_status() === PHP_SESSION_NONE) { // Si no hay ninguna sesión activa
                 <a href="http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/cambiar_password.php" class="sidebar-btn">
                     <i class="fas fa-lock"></i> Cambiar Contraseña
                 </a>
-                <a href="" class="sidebar-btn">
+                <a href="http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/perfil.php" class="sidebar-btn">
                     <i class="fas fa-user"></i> Mi Perfil
                 </a>
                 <a href="http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/controladores/logout.php" class="sidebar-btn">

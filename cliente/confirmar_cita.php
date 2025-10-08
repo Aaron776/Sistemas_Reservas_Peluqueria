@@ -290,35 +290,35 @@ if (!$cita) {
                     <span class="detail-label">
                         <i class="fas fa-user"></i> Cliente
                     </span>
-                    <span class="detail-value"><?php echo $cita->cliente; ?></span>
+                    <span class="detail-value"><?php echo htmlspecialchars($cita->cliente); ?></span>
                 </div>
                 
                 <div class="detail-item">
                     <span class="detail-label">
                         <i class="fas fa-scissors"></i> Servicio
                     </span>
-                    <span class="detail-value"><?php echo $cita->servicio; ?></span>
+                    <span class="detail-value"><?php echo htmlspecialchars($cita->servicio); ?></span>
                 </div>
                 
                 <div class="detail-item">
                     <span class="detail-label">
                         <i class="fas fa-calendar-day"></i> Fecha
                     </span>
-                    <span class="detail-value"><?php echo $cita->fecha; ?></span>
+                    <span class="detail-value"><?= htmlspecialchars(date('d/m/Y', strtotime($cita->fecha))); ?></span>
                 </div>
                 
                 <div class="detail-item">
                     <span class="detail-label">
                         <i class="fas fa-clock"></i> Hora
                     </span>
-                    <span class="detail-value"><?php echo  $cita->hora; ?> hrs </span>
+                    <span class="detail-value"><?php echo  htmlspecialchars($cita->hora); ?> hrs </span>
                 </div>
                 
                 <div class="detail-item">
                     <span class="detail-label">
                         <i class="fas fa-tag"></i> Precio
                     </span>
-                    <span class="detail-value price">$<?php echo $cita->precio; ?></span>
+                    <span class="detail-value price">$<?php echo htmlspecialchars($cita->precio); ?></span>
                 </div>
             </div>
             <div class="important-notes">
@@ -334,10 +334,6 @@ if (!$cita) {
             <div class="action-buttons">
                 <a href="reservar_cita.php" class="btn btn-confirm">
                     <i class="fas fa-arrow-left"></i> Volver a Reservar Citas
-                </a>
-                
-                <a href="reservar_cita.html" class="btn btn-cancel">
-                    <i class="fas fa-times"></i> Modificar Reserva
                 </a>
             </div>
         </div>

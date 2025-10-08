@@ -9,6 +9,27 @@ if ($_SESSION['rol'] !== 'admin') {
 
 include __DIR__ . "/../templates/header.php";
 include __DIR__ . "/../conexion/bd.php";
+
+// Obtener todos los servicios de la base de datos
+$sql = $conexion->prepare("SELECT id,nombre,descripcion,precio,duracion FROM servicios ORDER BY id DESC LIMIT 10");
+$sql->execute();
+$servicios = $sql->fetchAll(PDO::FETCH_OBJ);
+
+// Total de servicios
+$sql = $conexion->prepare("SELECT COUNT(*) as total FROM servicios");
+$sql->execute();
+$total_servicios = $sql->fetch(PDO::FETCH_OBJ);
+
+// Duración promedio
+$sql = $conexion->prepare("SELECT AVG(duracion) as duracion_promedio FROM servicios");
+$sql->execute();
+$duracion_promedio = $sql->fetch(PDO::FETCH_OBJ);
+
+// Precio promedio
+$sql = $conexion->prepare("SELECT AVG(precio) as precio_promedio FROM servicios");
+$sql->execute();
+$precio_promedio = $sql->fetch(PDO::FETCH_OBJ);
+
 ?>
 <style>
     :root {
@@ -71,6 +92,25 @@ include __DIR__ . "/../conexion/bd.php";
         border-radius: 0 0 15px 15px;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         overflow: hidden;
+    }
+
+    .alert {
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        border-radius: 3px;
+        font-size: 14px;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
     }
 
     .services-actions {
@@ -470,301 +510,122 @@ include __DIR__ . "/../conexion/bd.php";
         }
     }
 </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-scissors"></i> Gestión de Servicios</h1>
-            <p>Administra los servicios ofrecidos por la peluquería</p>
-        </div>
-
-        <div class="services-card">
-            <div class="services-actions">
-                <button class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Nuevo Servicio
-                </button>
-
-                <div class="search-box">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" class="search-input" placeholder="Buscar servicios...">
-                </div>
-            </div>
-
-            <div class="services-stats">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-scissors"></i></div>
-                    <div class="stat-number">12</div>
-                    <div class="stat-label">Servicios Activos</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-star"></i></div>
-                    <div class="stat-number">8</div>
-                    <div class="stat-label">Servicios Populares</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                    <div class="stat-number">45min</div>
-                    <div class="stat-label">Duración Promedio</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
-                    <div class="stat-number">$35.000</div>
-                    <div class="stat-label">Precio Promedio</div>
-                </div>
-            </div>
-
-            <div class="services-grid">
-                <!-- Servicio 1 -->
-                <div class="service-card featured">
-                    <div class="featured-badge">Popular</div>
-                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
-                    <div class="service-content">
-                        <div class="service-header">
-                            <div>
-                                <div class="service-category">Cortes & Peinados</div>
-                                <h3 class="service-title">Corte de Cabello Premium</h3>
-                            </div>
-                            <div class="service-price">$25.000</div>
-                        </div>
-
-                        <p class="service-description">
-                            Corte personalizado según tu tipo de rostro y estilo de vida. Incluye lavado, secado y acabado profesional.
-                        </p>
-
-                        <div class="service-details">
-                            <div class="service-duration">
-                                <i class="fas fa-clock"></i> 45 minutos
-                            </div>
-                            <div class="service-status status-active">
-                                <i class="fas fa-circle"></i> Activo
-                            </div>
-                        </div>
-
-                        <ul class="service-features">
-                            <li><i class="fas fa-check"></i> Asesoría de estilo personalizada</li>
-                            <li><i class="fas fa-check"></i> Productos premium incluidos</li>
-                            <li><i class="fas fa-check"></i> Técnicas de corte actualizadas</li>
-                        </ul>
-
-                        <div class="service-actions">
-                            <button class="btn btn-edit">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-delete" onclick="openDeleteModal(1, 'Corte de Cabello Premium')">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Servicio 2 -->
-                <div class="service-card">
-                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1559599101-f09722fb4948?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
-                    <div class="service-content">
-                        <div class="service-header">
-                            <div>
-                                <div class="service-category">Coloración</div>
-                                <h3 class="service-title">Coloración Profesional</h3>
-                            </div>
-                            <div class="service-price">$45.000</div>
-                        </div>
-
-                        <p class="service-description">
-                            Desde reflejos sutiles hasta cambios radicales de color. Usamos tintes de alta calidad que cuidan tu cabello.
-                        </p>
-
-                        <div class="service-details">
-                            <div class="service-duration">
-                                <i class="fas fa-clock"></i> 2 horas
-                            </div>
-                            <div class="service-status status-active">
-                                <i class="fas fa-circle"></i> Activo
-                            </div>
-                        </div>
-
-                        <ul class="service-features">
-                            <li><i class="fas fa-check"></i> Tintes libres de amoníaco</li>
-                            <li><i class="fas fa-check"></i> Diagnóstico capilar gratuito</li>
-                            <li><i class="fas fa-check"></i> Tratamiento hidratante incluido</li>
-                        </ul>
-
-                        <div class="service-actions">
-                            <button class="btn btn-edit">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-delete" onclick="openDeleteModal(2, 'Coloración Profesional')">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Servicio 3 -->
-                <div class="service-card">
-                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
-                    <div class="service-content">
-                        <div class="service-header">
-                            <div>
-                                <div class="service-category">Tratamientos</div>
-                                <h3 class="service-title">Tratamiento Capilar Reconstituyente</h3>
-                            </div>
-                            <div class="service-price">$35.000</div>
-                        </div>
-
-                        <p class="service-description">
-                            Recupera la salud de tu cabello con nuestro tratamiento reconstructor con keratina y proteínas.
-                        </p>
-
-                        <div class="service-details">
-                            <div class="service-duration">
-                                <i class="fas fa-clock"></i> 1.5 horas
-                            </div>
-                            <div class="service-status status-active">
-                                <i class="fas fa-circle"></i> Activo
-                            </div>
-                        </div>
-
-                        <ul class="service-features">
-                            <li><i class="fas fa-check"></i> Recuperación de cabello dañado</li>
-                            <li><i class="fas fa-check"></i> Brillo y suavidad inmediatos</li>
-                            <li><i class="fas fa-check"></i> Efecto duradero hasta 6 semanas</li>
-                        </ul>
-
-                        <div class="service-actions">
-                            <button class="btn btn-edit">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-delete" onclick="openDeleteModal(3, 'Tratamiento Capilar Reconstituyente')">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Servicio 4 -->
-                <div class="service-card">
-                    <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
-                    <div class="service-content">
-                        <div class="service-header">
-                            <div>
-                                <div class="service-category">Spa & Bienestar</div>
-                                <h3 class="service-title">Manicura & Pedicura Spa</h3>
-                            </div>
-                            <div class="service-price">$30.000</div>
-                        </div>
-
-                        <p class="service-description">
-                            Servicio completo de belleza para manos y pies. Incluye masaje relajante y esmaltado de larga duración.
-                        </p>
-
-                        <div class="service-details">
-                            <div class="service-duration">
-                                <i class="fas fa-clock"></i> 1 hora
-                            </div>
-                            <div class="service-status status-inactive">
-                                <i class="fas fa-circle"></i> Inactivo
-                            </div>
-                        </div>
-
-                        <ul class="service-features">
-                            <li><i class="fas fa-check"></i> Limpieza y exfoliación profunda</li>
-                            <li><i class="fas fa-check"></i> Masaje con aceites esenciales</li>
-                            <li><i class="fas fa-check"></i> Esmaltado semipermanente opcional</li>
-                        </ul>
-
-                        <div class="service-actions">
-                            <button class="btn btn-edit">
-                                <i class="fas fa-edit"></i> Editar
-                            </button>
-                            <button class="btn btn-delete" onclick="openDeleteModal(4, 'Manicura & Pedicura Spa')">
-                                <i class="fas fa-trash"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-scissors"></i> Gestión de Servicios</h1>
+        <p>Administra los servicios ofrecidos por la peluquería</p>
     </div>
 
-    <!-- Modal de confirmación de eliminación -->
-    <div class="modal" id="deleteModal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeDeleteModal()">&times;</button>
-            <h2><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h2>
-            <p id="modalServiceInfo">¿Estás seguro de que deseas eliminar este servicio?</p>
-            <p style="color: var(--error); font-weight: 600;">
-                <i class="fas fa-info-circle"></i> Esta acción no se puede deshacer y afectará las citas futuras.
-            </p>
-            <div class="modal-buttons">
-                <button class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
-                <button class="btn btn-delete" onclick="confirmDelete()">
-                    <i class="fas fa-trash"></i> Eliminar Definitivamente
-                </button>
+    <div class="services-card">
+        <?php if (isset($_SESSION['exito'])) : ?>
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <?= $_SESSION['exito']; ?>
+            </div>
+            <?php unset($_SESSION['exito']); ?>
+        <?php endif; ?>
+        <?php if (isset($_SESSION['errores'])) : ?>
+            <div class="alert alert-danger">
+                <ul>
+                    <?php foreach ($_SESSION['errores'] as $error) : ?>
+                        <li><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <?php unset($_SESSION['errores']); ?>
+        <?php endif; ?>
+        <div class="services-actions">
+            <a href="agregar_servicio.php" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nuevo Servicio
+            </a>
+
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Buscar servicios...">
             </div>
         </div>
+
+        <div class="services-stats">
+
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-number"><?= htmlspecialchars($total_servicios->total) ?></div>
+                <div class="stat-label">Servicios Populares</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-number"><?= htmlspecialchars(round($duracion_promedio->duracion_promedio)) ?> min</div>
+                <div class="stat-label">Duración Promedio</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="stat-number">$<?= htmlspecialchars(number_format($precio_promedio->precio_promedio, 0, ',', '.')) ?></div>
+                <div class="stat-label">Precio Promedio</div>
+            </div>
+        </div>
+
+        <div class="services-grid">
+            <?php if (empty($servicios)) { ?>
+                <p style="text-align:center; color:#555;">No hay servicios disponibles por el momento.</p>
+            <?php } else { ?>
+                <?php foreach ($servicios as $item) { ?>
+                    <div class="service-card">
+                        <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1559599101-f09722fb4948?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
+                        <div class="service-content">
+                            <div class="service-header">
+                                <div>
+                                    <h3 class="service-title"><?php echo $item->nombre; ?></h3>
+                                </div>
+                                <div class="service-price">$<?php echo $item->precio; ?></div>
+                            </div>
+
+                            <p class="service-description">
+                                <?php echo $item->descripcion; ?>.
+                            </p>
+
+                            <div class="service-details">
+                                <div class="service-duration">
+                                    <i class="fas fa-clock"></i> <?php echo $item->duracion; ?> minutos
+                                </div>
+                            </div>
+
+                            <div class="service-actions">
+                                <a href="editar_servicio.php?id_servicio=<?php echo $item->id; ?>" class="btn btn-edit">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <form action="../controladores/eliminar_servicio.php" method="POST">
+                                    <input type="hidden" name="id_servicio" value="<?php echo $item->id; ?>">
+                                    <button type="submit" class="btn btn-delete">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+            <?php } ?>
+        </div>
     </div>
+</div>
 
-    <script>
-        let serviceToDelete = null;
+<script>
+    // Búsqueda en tiempo real
+    document.querySelector('.search-input').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const services = document.querySelectorAll('.service-card');
 
-        function openDeleteModal(serviceId, serviceName) {
-            serviceToDelete = serviceId;
-            document.getElementById('modalServiceInfo').textContent =
-                `¿Estás seguro de que deseas eliminar el servicio "${serviceName}"?`;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
+        services.forEach(service => {
+            const title = service.querySelector('.service-title').textContent.toLowerCase();
+            const description = service.querySelector('.service-description').textContent.toLowerCase();
+            const category = service.querySelector('.service-category').textContent.toLowerCase();
 
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').style.display = 'none';
-            serviceToDelete = null;
-        }
-
-        function confirmDelete() {
-            if (serviceToDelete) {
-                // Simular eliminación
-                const deleteBtn = document.querySelector('#deleteModal .btn-delete');
-                const originalText = deleteBtn.innerHTML;
-
-                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
-                deleteBtn.disabled = true;
-
-                setTimeout(() => {
-                    alert(`Servicio con ID ${serviceToDelete} eliminado exitosamente.`);
-                    closeDeleteModal();
-                    // Aquí iría la actualización de la lista
-                    // window.location.reload();
-                }, 1500);
-            }
-        }
-
-        // Cerrar modal al hacer clic fuera
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('deleteModal');
-            if (event.target === modal) {
-                closeDeleteModal();
+            if (title.includes(searchTerm) || description.includes(searchTerm) || category.includes(searchTerm)) {
+                service.style.display = 'block';
+            } else {
+                service.style.display = 'none';
             }
         });
-
-        // Búsqueda en tiempo real
-        document.querySelector('.search-input').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const services = document.querySelectorAll('.service-card');
-
-            services.forEach(service => {
-                const title = service.querySelector('.service-title').textContent.toLowerCase();
-                const description = service.querySelector('.service-description').textContent.toLowerCase();
-                const category = service.querySelector('.service-category').textContent.toLowerCase();
-
-                if (title.includes(searchTerm) || description.includes(searchTerm) || category.includes(searchTerm)) {
-                    service.style.display = 'block';
-                } else {
-                    service.style.display = 'none';
-                }
-            });
-        });
-    </script>
+    });
+</script>
 <?php include __DIR__ . "/../templates/footer.php"; ?>

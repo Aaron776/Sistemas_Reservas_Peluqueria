@@ -25,6 +25,10 @@ $sql = $conexion->prepare("SELECT citas.id,citas.fecha,citas.hora,servicios.nomb
 $sql->bindParam(':id_cita', $id_cita, PDO::PARAM_INT);
 $sql->execute();
 $cita = $sql->fetch(PDO::FETCH_OBJ);
+
+if (!$cita) {
+    die("Cita no encontrada.");
+}
 ?>
 <style>
     :root {
@@ -344,11 +348,11 @@ $cita = $sql->fetch(PDO::FETCH_OBJ);
             <div class="info-grid">
                 <div class="info-item">
                     <span class="info-label"><i class="fas fa-user"></i> Cliente</span>
-                    <span class="info-value"><?php echo $cita->cliente; ?></span>
+                    <span class="info-value"><?php echo htmlspecialchars($cita->cliente); ?></span>
                 </div>
                 <div class="info-item">
                     <span class="info-label"><i class="fas fa-scissors"></i> Servicio</span>
-                    <span class="info-value"><?php echo $cita->servicio; ?> - $<?php echo $cita->precio; ?></span>
+                    <span class="info-value"><?php echo htmlspecialchars($cita->servicio); ?> - $<?php echo htmlspecialchars($cita->precio); ?></span>
                 </div>
                 <div class="info-item">
                     <span class="info-label"><i class="fas fa-info-circle"></i> Estado Actual</span>

@@ -198,7 +198,6 @@ session_start();
                 <div class="form-group">
                     <label for="firstName">Nombre Completo</label>
                     <input type="text" id="firstName" class="form-input" name="nombre" placeholder="Tus nombres" required>
-
                 </div>
 
             </div>
@@ -206,13 +205,11 @@ session_start();
             <div class="form-group">
                 <label for="email">Correo Electrónico</label>
                 <input type="email" id="email" class="form-input" name="email" placeholder="tu@email.com" required>
-
             </div>
 
             <div class="form-group">
                 <label for="phone">Teléfono</label>
-                <input type="tel" id="phone" class="form-input" name="telefono" placeholder="Tu número de teléfono" required>
-
+                <input type="text" id="phone" class="form-input" name="telefono" placeholder="Tu número de teléfono">
             </div>
 
             <div class="form-row">

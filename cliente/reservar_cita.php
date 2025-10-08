@@ -3,7 +3,7 @@ include __DIR__ . "/../autorizacion/auth.php"; // valida login y arranca sesión
 
 // Verificar que tenga rol de cliente
 if ($_SESSION['rol'] !== 'cliente') {
-    header("Location: " . __DIR__ . "/../index.php"); // si no lo mandamos al login
+    header("Location: ../index.php"); // si no lo mandamos al login
     exit();
 }
 
@@ -158,23 +158,27 @@ $servicios = $sql->fetchAll(PDO::FETCH_OBJ);
             <!-- Fecha -->
             <div class="form-group">
                 <label for="fecha"><i class="fas fa-calendar-day"></i> Fecha de la Cita</label>
-                <input type="date" id="fecha" name="fecha" class="form-input" required>
+                <input type="date" id="fecha" name="fecha" class="form-input" min="<?= date('Y-m-d') ?>" required>
             </div>
 
             <!-- Hora -->
             <div class="form-group">
                 <label for="hora"><i class="fas fa-clock"></i> Hora de la Cita</label>
-                <input type="time" id="hora" name="hora" class="form-input" required>
+                <input type="time" id="hora" name="hora" class="form-input" min="08:00" max="20:00" required>
             </div>
 
             <!-- Servicio -->
             <div class="form-group">
                 <label for="id_servicio"><i class="fas fa-scissors"></i> Selecciona un Servicio</label>
                 <select id="id_servicio" name="servicio_id" class="form-select" required>
-                    <option value="">-- Selecciona un servicio --</option>
-                    <?php foreach ($servicios as $item) : ?>
-                        <option value="<?php echo $item->id; ?>"><?php echo $item->nombre; ?> - $<?php echo $item->precio; ?></option>
-                    <?php endforeach; ?>
+                    <?php if (empty($servicios)) : ?>
+                        <option value="">No hay servicios disponibles</option>
+                    <?php else : ?>
+                        <option value="">-- Selecciona un servicio --</option>
+                        <?php foreach ($servicios as $item) : ?>
+                            <option value="<?= htmlspecialchars($item->id) ?>"><?= htmlspecialchars($item->nombre) ?> - $<?= htmlspecialchars($item->precio) ?></option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </select>
             </div>
 

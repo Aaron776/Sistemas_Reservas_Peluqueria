@@ -364,7 +364,7 @@
                 <div class="nav-buttons">
                     <a href="login.php" class="btn btn-login">Iniciar Sesión</a>
                     <a href="registro_usuario.php" class="btn btn-register">Registrarse</a>
-                    <a href="cita.php" class="btn btn-book">Reservar Cita</a>
+                    <a href="login.php" class="btn btn-book">Reservar Cita</a>
                 </div>
             </div>
         </div>
@@ -376,7 +376,6 @@
             <div class="hero-content">
                 <h2>Tu estilo, nuestra expertise</h2>
                 <p>Descubre los mejores servicios de peluquería con profesionales dedicados a realzar tu belleza única.</p>
-                <a href="cita.php" class="btn btn-book">Reservar Cita Ahora</a>
             </div>
         </div>
     </section>

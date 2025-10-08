@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -63,6 +67,25 @@
             display: flex;
             align-items: center;
             gap: 5px;
+        }
+
+        .alert {
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
         
         .recovery-header h1 {
@@ -308,20 +331,23 @@
             <h1>Recuperar Contraseña</h1>
         </div>
         
-        
-        <div class="message message-success" id="success-message">
-            <i class="fas fa-check-circle"></i> <span id="success-text"></span>
-        </div>
-        
-        <div class="message message-error" id="error-message">
-            <i class="fas fa-exclamation-circle"></i> <span id="error-text"></span>
-        </div>
-        
-        <div class="message message-info" id="info-message">
-            <i class="fas fa-info-circle"></i> Hemos enviado un código de verificación a tu correo electrónico.
-        </div>
-        
         <form class="recovery-form" id="recovery-form" method="POST" action="controladores/olvido_password.php">
+        <?php if (isset($_SESSION['exito'])) : ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> <?= $_SESSION['exito']; ?>
+                </div>
+                <?php unset($_SESSION['exito']); ?>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['errores'])) : ?>
+                <div class="alert alert-danger">
+                    <ul>
+                        <?php foreach ($_SESSION['errores'] as $error) : ?>
+                            <li><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+                <?php unset($_SESSION['errores']); ?>
+            <?php endif; ?>
             <!-- Paso 1: Ingresar email -->
             <div class="step-content active" id="step1-content">
                 <div class="form-group">

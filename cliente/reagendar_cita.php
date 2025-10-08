@@ -9,6 +9,10 @@ if ($_SESSION['rol'] !== 'cliente') {
 include_once __DIR__ . '/../templates/header.php';
 include_once __DIR__ . '/../conexion/bd.php';
 
+// Validar que venga el id_cita
+if (!isset($_GET['id_cita']) || !is_numeric($_GET['id_cita'])) {
+    die("Solicitud inválida");
+}
 $id_cita = $_GET['id_cita']; // ID de la cita que mando por la URL para reagendar
 $id_usuario = $_SESSION['id_usuario']; // ID del usuario actual
 

@@ -2,18 +2,26 @@
 session_start();
 include_once __DIR__ . '/../conexion/bd.php';
 
+// Verificar permisos de admin
+if($_SESSION['rol'] !== 'admin'){
+    $_SESSION['errores'] = ["No tienes permisos para actualizar el estado de la cita."];
+    header("Location: ../admin/gestion_citas.php");
+    exit();
+}
+
 if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id_cita']) && isset($_POST['estado'])){
-    $id_cita = trim($_POST['id_cita']);
+    $id_cita = filter_var($_POST['id_cita'], FILTER_VALIDATE_INT);
     $estado = trim($_POST['estado']);
     $errores = [];
+    $estados_permitidos = ['pendiente','confirmada','cancelada'];
 
-    //Validaciones
-    if (empty($id_cita)) {
-        $errores[] = "El ID de la cita es obligatorio.";
+    //---------------- Validaciones--------------
+
+    if(!$id_cita || $id_cita < 1){
+        $errores[] = "ID de la cita inválido.";
     }
-
-    if (empty($estado)) {
-        $errores[] = "El estado de la cita es obligatorio.";
+    if(!in_array($estado, $estados_permitidos)){
+        $errores[] = "Estado de la cita no válido.";
     }
 
     if(empty($errores)){
@@ -24,19 +32,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id_cita']) && isset($_P
 
         $_SESSION['exito'] = "El estado de la cita se ha actualizado correctamente.";
         header("Location: ../admin/gestion_citas.php");
-        exit;
-
+        exit();
     }else{
         $_SESSION['errores'] = $errores;
-        header("Location: ../admin/editar_estado_cita.php");
-        exit;
+        header("Location: ../admin/editar_estado_cita.php?id_cita={$id_cita}");
+        exit();
     }
-
-
 }else{
-    echo "Error en la solicitud";
-    exit;
+    $_SESSION['errores'] = ["Error en la solicitud."];
+    header("Location: ../admin/editar_estado_cita.php");
+    exit();
 }
-
-
 ?>

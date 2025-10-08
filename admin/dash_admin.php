@@ -3,11 +3,60 @@ include __DIR__ . "/../autorizacion/auth.php"; // valida login y arranca sesión
 
 // Verificar que tenga rol de admin
 if ($_SESSION['rol'] !== 'admin') {
-        header("Location: /Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/index.php"); // si no lo mandamos al login
+    header("Location: /Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/index.php"); // si no lo mandamos al login
     exit();
 }
 
 include __DIR__ . "/../templates/header.php";
+include __DIR__ . "/../conexion/bd.php";
+
+// Obtener la cantidad de citas realizadas
+$sql = $conexion->prepare("SELECT COUNT(*) as total FROM citas WHERE estado = 'confirmada'");
+$sql->execute();
+$total_citas = $sql->fetch(PDO::FETCH_OBJ);
+
+// Obtener la cantidad de usuarios tipo cliente
+$sql = $conexion->prepare("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'cliente'");
+$sql->execute();
+$total_clientes = $sql->fetch(PDO::FETCH_OBJ);
+
+// Obtener la cantidad de servicios
+$sql = $conexion->prepare("SELECT COUNT(*) as total FROM servicios");
+$sql->execute();
+$total_servicios = $sql->fetch(PDO::FETCH_OBJ);
+
+// Obtener las ultimas 5 citas
+$sql = $conexion->prepare("SELECT usuarios.nombre AS cliente,servicios.nombre AS servicio, citas.fecha AS fecha, citas.hora AS hora,citas.estado AS estado FROM citas INNER JOIN servicios ON citas.servicio_id = servicios.id INNER JOIN usuarios ON citas.usuario_id = usuarios.id  ORDER BY fecha DESC LIMIT 5");
+$sql->execute();
+$citas = $sql->fetchAll(PDO::FETCH_OBJ);
+
+// Servicios más solicitados
+$sql = $conexion->prepare("SELECT s.nombre, COUNT(*) as total 
+    FROM citas c
+    INNER JOIN servicios s ON c.servicio_id = s.id
+    WHERE c.estado = 'confirmada'
+    GROUP BY s.nombre
+    ORDER BY total DESC
+    LIMIT 5");
+$sql->execute();
+$servicios_populares = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+// Citas por día de la semana
+$sql = $conexion->prepare("SELECT DAYNAME(fecha) as dia, COUNT(*) as total 
+    FROM citas
+    WHERE YEARWEEK(fecha) = YEARWEEK(CURDATE())
+    GROUP BY dia
+    ORDER BY FIELD(dia,'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')");
+$sql->execute();
+$citas_dias = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+// Estado de citas
+$sql = $conexion->prepare("SELECT estado, COUNT(*) as total 
+    FROM citas 
+    GROUP BY estado");
+$sql->execute();
+$citas_estado = $sql->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 
 <style>
@@ -525,27 +574,13 @@ include __DIR__ . "/../templates/header.php";
 <div class="dashboard-cards">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Ingresos del Mes</h3>
-            <div class="card-icon icon-primary">
-                <i class="fas fa-dollar-sign"></i>
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="card-value">$8,450.00</div>
-            <p class="card-text"><span class="text-success"><i class="fas fa-arrow-up"></i> 12.5%</span> respecto al mes anterior</p>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-header">
             <h3 class="card-title">Citas Totales</h3>
             <div class="card-icon icon-success">
                 <i class="fas fa-calendar-check"></i>
             </div>
         </div>
         <div class="card-body">
-            <div class="card-value">156</div>
-            <p class="card-text"><span class="text-success"><i class="fas fa-arrow-up"></i> 8%</span> respecto a la semana pasada</p>
+            <div class="card-value"><?php echo $total_citas->total; ?></div>
         </div>
     </div>
 
@@ -557,42 +592,24 @@ include __DIR__ . "/../templates/header.php";
             </div>
         </div>
         <div class="card-body">
-            <div class="card-value">243</div>
-            <p class="card-text"><span class="text-success"><i class="fas fa-arrow-up"></i> 5%</span> nuevos clientes este mes</p>
+            <div class="card-value"><?php echo $total_clientes->total; ?></div>
         </div>
     </div>
 
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Servicios Realizados</h3>
+            <h3 class="card-title">Servicios Existentes</h3>
             <div class="card-icon icon-info">
                 <i class="fas fa-scissors"></i>
             </div>
         </div>
         <div class="card-body">
-            <div class="card-value">287</div>
-            <p class="card-text"><span class="text-success"><i class="fas fa-arrow-up"></i> 15%</span> respecto al mes anterior</p>
+            <div class="card-value"><?php echo $total_servicios->total; ?></div>
         </div>
     </div>
 </div>
 
 <div class="charts-row">
-    <div class="chart-container">
-        <div class="chart-header">
-            <h3 class="chart-title">Ingresos Mensuales</h3>
-            <div class="chart-actions">
-                <select id="revenue-period">
-                    <option value="month">Este Mes</option>
-                    <option value="quarter">Este Trimestre</option>
-                    <option value="year">Este Año</option>
-                </select>
-            </div>
-        </div>
-        <div class="chart-canvas">
-            <canvas id="revenueChart"></canvas>
-        </div>
-    </div>
-
     <div class="chart-container">
         <div class="chart-header">
             <h3 class="chart-title">Servicios Más Solicitados</h3>
@@ -638,12 +655,6 @@ include __DIR__ . "/../templates/header.php";
 
 <h3 class="section-title">Citas Recientes</h3>
 <div class="table-container">
-    <div class="card-header">
-        <h3 class="card-title">Últimas Citas Programadas</h3>
-        <button class="btn btn-primary btn-sm">
-            <i class="fas fa-plus"></i> Nueva Cita
-        </button>
-    </div>
     <div class="card-body">
         <table>
             <thead>
@@ -651,236 +662,78 @@ include __DIR__ . "/../templates/header.php";
                     <th>Cliente</th>
                     <th>Servicio</th>
                     <th>Fecha y Hora</th>
-                    <th>Estilista</th>
                     <th>Estado</th>
-                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Juan Sánchez</td>
-                    <td>Corte de Cabello</td>
-                    <td>15 Ago 2023 - 10:30 AM</td>
-                    <td>María Rodríguez</td>
-                    <td><span class="status-badge status-confirmed">Confirmada</span></td>
-                    <td>
-                        <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Ana García</td>
-                    <td>Coloración</td>
-                    <td>15 Ago 2023 - 11:45 AM</td>
-                    <td>Carlos Méndez</td>
-                    <td><span class="status-badge status-pending">Por confirmar</span></td>
-                    <td>
-                        <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Roberto López</td>
-                    <td>Tratamiento Capilar</td>
-                    <td>15 Ago 2023 - 2:15 PM</td>
-                    <td>Laura Fernández</td>
-                    <td><span class="status-badge status-confirmed">Confirmada</span></td>
-                    <td>
-                        <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Marta Díaz</td>
-                    <td>Manicura y Pedicura</td>
-                    <td>16 Ago 2023 - 9:00 AM</td>
-                    <td>Elena Castro</td>
-                    <td><span class="status-badge status-confirmed">Confirmada</span></td>
-                    <td>
-                        <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Carlos Ruiz</td>
-                    <td>Corte de Cabello</td>
-                    <td>16 Ago 2023 - 4:30 PM</td>
-                    <td>María Rodríguez</td>
-                    <td><span class="status-badge status-cancelled">Cancelada</span></td>
-                    <td>
-                        <button class="action-btn btn-view"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
+                <?php foreach ($citas as $item) : ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($item->cliente); ?></td>
+                        <td><?php echo htmlspecialchars($item->servicio); ?></td>
+                        <td><?php echo htmlspecialchars($item->fecha); ?> - <?php echo htmlspecialchars($item->hora); ?></td>
+                        <td>
+                            <?php if ($item->estado == 'pendiente') : ?>
+                                <span class="status-badge status-pending">Pendiente</span>
+                            <?php elseif ($item->estado == 'confirmada') : ?>
+                                <span class="status-badge status-confirmed">Confirmada</span>
+                            <?php elseif ($item->estado == 'cancelada') : ?>
+                                <span class="status-badge status-cancelled">Cancelada</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </div>
 </div>
 </div>
-
-<?php include '../templates/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Funcionalidad para mostrar/ocultar sidebar en móviles
-    const toggleSidebar = document.getElementById('toggle-sidebar');
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('overlay');
-
-    toggleSidebar.addEventListener('click', function() {
-        sidebar.classList.toggle('show');
-        overlay.classList.toggle('show');
-    });
-
-    overlay.addEventListener('click', function() {
-        sidebar.classList.remove('show');
-        overlay.classList.remove('show');
-    });
-
-    // Funcionalidad para los elementos del menú
-    document.querySelectorAll('.sidebar-menu-item').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('.sidebar-menu-item').forEach(i => {
-                i.classList.remove('active');
-            });
-            this.classList.add('active');
-
-            // En una implementación real, aquí se cargaría el contenido correspondiente
-            if (this.querySelector('span').textContent === 'Cerrar Sesión') {
-                window.location.href = 'login.html';
-            }
-        });
-    });
-
-    // Gráfico de Ingresos Mensuales
-    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-    const revenueChart = new Chart(revenueCtx, {
-        type: 'line',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            datasets: [{
-                label: 'Ingresos en $',
-                data: [6200, 5900, 7200, 8100, 7800, 8500, 9200, 8450, 0, 0, 0, 0],
-                backgroundColor: 'rgba(138, 90, 68, 0.1)',
-                borderColor: '#8a5a44',
-                borderWidth: 2,
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    }
-                }
-            }
-        }
-    });
-
-    // Gráfico de Servicios Más Solicitados
-    const servicesCtx = document.getElementById('servicesChart').getContext('2d');
-    const servicesChart = new Chart(servicesCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Corte de Cabello', 'Coloración', 'Tratamientos', 'Manicura', 'Otros'],
-            datasets: [{
-                data: [45, 25, 15, 10, 5],
-                backgroundColor: [
-                    '#8a5a44',
-                    '#c17a4a',
-                    '#d4b8a5',
-                    '#3a2e26',
-                    '#f8f4f0'
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    // Gráfico de Citas por Día de la Semana
-    const appointmentsCtx = document.getElementById('appointmentsChart').getContext('2d');
-    const appointmentsChart = new Chart(appointmentsCtx, {
+    const serviciosData = <?php echo json_encode($servicios_populares); ?>;
+    const citasDiasData = <?php echo json_encode($citas_dias); ?>;
+    const citasEstadoData = <?php echo json_encode($citas_estado); ?>;
+</script>
+<script>
+    // ====== Servicios más solicitados ======
+    const ctxServices = document.getElementById('servicesChart').getContext('2d');
+    new Chart(ctxServices, {
         type: 'bar',
         data: {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            labels: serviciosData.map(s => s.nombre),
             datasets: [{
-                label: 'Número de Citas',
-                data: [18, 22, 20, 24, 28, 35, 12],
-                backgroundColor: '#8a5a44',
-                borderWidth: 0
+                label: 'Citas confirmadas',
+                data: serviciosData.map(s => s.total),
+                backgroundColor: '#8a5a44'
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        drawBorder: false
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    }
                 }
             }
         }
     });
 
-    // Gráfico de Estado de Citas
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    const statusChart = new Chart(statusCtx, {
-        type: 'pie',
+    // ====== Citas por día de la semana ======
+    const ctxAppointments = document.getElementById('appointmentsChart').getContext('2d');
+    new Chart(ctxAppointments, {
+        type: 'line',
         data: {
-            labels: ['Confirmadas', 'Pendientes', 'Canceladas'],
+            labels: citasDiasData.map(d => d.dia),
             datasets: [{
-                data: [65, 25, 10],
-                backgroundColor: [
-                    '#28a745',
-                    '#ffc107',
-                    '#dc3545'
-                ],
-                borderWidth: 0
+                label: 'Citas',
+                data: citasDiasData.map(d => d.total),
+                borderColor: '#17a2b8',
+                backgroundColor: 'rgba(23,162,184,0.2)',
+                fill: true,
+                tension: 0.4
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     position: 'bottom'
@@ -889,18 +742,27 @@ include __DIR__ . "/../templates/header.php";
         }
     });
 
-    // Funcionalidad para los botones de acción
-    document.querySelectorAll('.action-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            if (this.classList.contains('btn-view')) {
-                alert('Funcionalidad de ver detalles');
-            } else if (this.classList.contains('btn-edit')) {
-                alert('Funcionalidad de editar');
-            } else if (this.classList.contains('btn-delete')) {
-                if (confirm('¿Estás seguro de que deseas eliminar esta cita?')) {
-                    alert('Cita eliminada correctamente');
+    // ====== Estado de citas ======
+    const ctxStatus = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctxStatus, {
+        type: 'doughnut',
+        data: {
+            labels: citasEstadoData.map(e => e.estado),
+            datasets: [{
+                data: citasEstadoData.map(e => e.total),
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
-        });
+        }
     });
 </script>
+
+
+<?php include '../templates/footer.php'; ?>

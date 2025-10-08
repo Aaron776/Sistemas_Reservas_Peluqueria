@@ -573,41 +573,36 @@ $total_usuarios_cliente = $sql->fetch(PDO::FETCH_OBJ);
             </table>
 
             <!-- Tarjetas para móvil -->
-            <div class="mobile-user-card">
-                <div class="mobile-card-row">
-                    <span class="mobile-card-label">Usuario:</span>
-                    <span>
-                        <div class="user-info">
-                            <div class="user-avatar">M</div>
-                            <div class="user-details">
-                                <h4>María González</h4>
-                                <p>Registro: 15/11/2023</p>
+            <?php foreach ($usuarios as $item) : ?>
+                <div class="mobile-user-card">
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Usuario:</span>
+                        <span>
+                            <div class="user-info">
+                                <div class="user-avatar"><?= substr($item->nombre, 0, 2); ?></div>
+                                <div class="user-details">
+                                    <h4><?= htmlspecialchars($item->nombre); ?></h4>
+                                    <p><?= htmlspecialchars($item->email); ?></p>
+                                </div>
                             </div>
-                        </div>
-                    </span>
+                        </span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Rol:</span>
+                        <span class="role-badge <?= $roleClass ?>"><?= ucfirst($item->rol); ?></span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Teléfono:</span>
+                        <span><?= htmlspecialchars($item->telefono); ?></span>
+                    </div>
+                    <div class="mobile-card-actions">
+                        <button class="btn btn-danger" onclick="openDeleteModal(<?= $item->id ?>,'<?= addslashes($item->nombre) ?>')">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
                 </div>
-                <div class="mobile-card-row">
-                    <span class="mobile-card-label">Rol:</span>
-                    <span class="role-badge role-admin">Administrador</span>
-                </div>
-                <div class="mobile-card-row">
-                    <span class="mobile-card-label">Email:</span>
-                    <span>maria.gonzalez@email.com</span>
-                </div>
-                <div class="mobile-card-row">
-                    <span class="mobile-card-label">Teléfono:</span>
-                    <span>+56 9 1234 5678</span>
-                </div>
-                <div class="mobile-card-row">
-                    <span class="mobile-card-label">Estado:</span>
-                    <span class="status-active">Activo</span>
-                </div>
-                <div class="mobile-card-actions">
-                    <button class="btn btn-danger" onclick="openDeleteModal(1, 'María González')">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </button>
-                </div>
-            </div>
+            <?php endforeach; ?>
+
 
             <div class="pagination">
                 <button class="pagination-btn active">1</button>
@@ -619,23 +614,7 @@ $total_usuarios_cliente = $sql->fetch(PDO::FETCH_OBJ);
     </div>
 </div>
 
-<!-- Modal de confirmación de eliminación -->
-<div class="modal" id="deleteModal">
-    <div class="modal-content">
-        <button class="close-modal" onclick="closeDeleteModal()">&times;</button>
-        <h2><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h2>
-        <p id="modalUserInfo">¿Estás seguro de que deseas eliminar a este usuario?</p>
-        <p style="color: var(--error); font-weight: 600;">
-            <i class="fas fa-info-circle"></i> Esta acción no se puede deshacer.
-        </p>
-        <div class="modal-buttons">
-            <button class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
-            <button class="btn btn-danger" onclick="confirmDelete()">
-                <i class="fas fa-trash"></i> Eliminar Definitivamente
-            </button>
-        </div>
-    </div>
-</div>
+
 
 <script>
     // Búsqueda en tiempo real

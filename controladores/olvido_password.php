@@ -25,8 +25,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])){
     $usuario = $sql->fetch(PDO::FETCH_OBJ);
 
     if(empty($errores) && $usuario){// Si el usuario existe en la base de datos
-        // Generar código aleatorio de 10 caracteres
-        $nuevaPassword = substr(str_shuffle("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"), 0, 8);
+        // Generar código aleatorio de 8 caracteres
+        $nuevaPassword = substr(bin2hex(random_bytes(4)), 0, 8);
          // Hashear el código correcto
          $codigoHasheado = password_hash($nuevaPassword, PASSWORD_DEFAULT);
 
@@ -48,11 +48,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])){
             $mail->Port       = 465;
             $mail->CharSet    = 'UTF-8';
 
-            $mail->setFrom('aronortiz759@gmail.com', 'Sistema de Turnos');
+            $mail->setFrom('aronortiz759@gmail.com', 'Sistema de Reservas StyleCut');
             $mail->addAddress($usuario->email);
 
             $mail->isHTML(true);
-            $mail->Subject = 'Recuperación de contraseña - Sistema de Turnos';
+            $mail->Subject = 'Recuperación de contraseña - Sistema de Reservas StyleCut';
             $mail->Body    = "
                 <h2>Recuperación de contraseña</h2>
                 <p>Hola, has solicitado recuperar tu contraseña.</p>
@@ -63,7 +63,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])){
             $mail->send();
             $_SESSION['exito'] = "¡Correo enviado! Por favor revisa tu bandeja de entrada.";
         } catch (Exception $e) {
-            echo "Error al enviar el correo: {$mail->ErrorInfo}";
+            $_SESSION['errores'] = ["Error al enviar el correo: {$mail->ErrorInfo}"];
         }
     }else{
         $_SESSION['errores'] = $errores;
@@ -74,7 +74,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['email'])){
     exit();
 
 }else{
-    echo "Error en la solicitud";
+    $_SESSION['errores'] = "Error en la solicitud";
+    header("Location: ../olvido_password.php");
     exit;
 }
 

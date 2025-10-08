@@ -18,6 +18,7 @@ session_start();
             --dark: #3a2e26;
             --light: #f8f4f0;
             --text: #333333;
+            --github: #24292e;
         }
 
         * {
@@ -120,6 +121,11 @@ session_start();
             width: 100%;
             font-size: 16px;
             border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
         }
 
         .btn-primary {
@@ -129,6 +135,36 @@ session_start();
 
         .btn-primary:hover {
             background-color: var(--accent);
+        }
+
+        .btn-github {
+            background-color: var(--github);
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .btn-github:hover {
+            background-color: #1a1e22;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 25px 0;
+            color: #999;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .divider span {
+            padding: 0 15px;
+            font-size: 14px;
         }
 
         .form-footer {
@@ -161,7 +197,7 @@ session_start();
             <p>Accede a tu cuenta de StyleCut</p>
         </div>
 
-        <form class="login-form" action="controladores/login.php" method="POST">
+        <div class="login-form">
             <?php if (isset($_SESSION['errores'])) : ?>
                 <div class="alert alert-danger">
                     <ul>
@@ -172,27 +208,41 @@ session_start();
                 </div>
                 <?php unset($_SESSION['errores']); ?>
             <?php endif; ?>
-            <div class="form-group">
-                <label for="email">Correo Electrónico</label>
-                <input type="email" id="email" name="email" class="form-input" placeholder="tu@email.com" required>
-                <div class="error-message" id="email-error">Por favor ingresa un correo válido</div>
+
+            <!-- Botón de GitHub -->
+            <a href="controladores/github_login.php" class="btn btn-github">
+                <i class="fab fa-github"></i>
+                Continuar con GitHub
+            </a>
+
+            <div class="divider">
+                <span>O continúa con tu email</span>
             </div>
 
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" name="password" id="password" class="form-input" placeholder="Tu contraseña" required>
-                <div class="error-message" id="password-error">La contraseña es requerida</div>
-            </div>
+            <!-- Formulario tradicional -->
+            <form action="controladores/login.php" method="POST">
+                <div class="form-group">
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="tu@email.com" required>
+                    <div class="error-message" id="email-error">Por favor ingresa un correo válido</div>
+                </div>
 
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
-            </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" name="password" id="password" class="form-input" placeholder="Tu contraseña" required>
+                    <div class="error-message" id="password-error">La contraseña es requerida</div>
+                </div>
 
-            <div class="form-footer">
-                <p>¿No tienes una cuenta? <a href="registro_usuario.php">Regístrate aquí</a></p>
-                <p><a href="olvido_password.php">¿Olvidaste tu contraseña?</a></p>
-            </div>
-        </form>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                </div>
+
+                <div class="form-footer">
+                    <p>¿No tienes una cuenta? <a href="registro_usuario.php">Regístrate aquí</a></p>
+                    <p><a href="olvido_password.php">¿Olvidaste tu contraseña?</a></p>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 

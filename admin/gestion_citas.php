@@ -608,7 +608,7 @@ $citas = $sql->fetchAll(PDO::FETCH_OBJ);
                     <div class="mobile-card-row">
                         <span class="mobile-card-label">Servicio:</span>
                         <span>
-                            <div class="service-info"><?php echo $item->servicio; ?></div>
+                        <div class="service-info" data-id="<?php echo $item->servicio_id; ?>"><?php echo $item->servicio; ?></div>
                             <div class="service-price">$<?php echo $item->precio; ?></div>
                         </span>
                     </div>

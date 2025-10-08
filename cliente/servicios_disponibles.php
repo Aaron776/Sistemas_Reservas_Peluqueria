@@ -3,7 +3,7 @@ include_once __DIR__ . '/../autorizacion/auth.php';
 
 // Verificar que tenga rol de cliente
 if ($_SESSION['rol'] !== 'cliente') {
-    header("Location: " . __DIR__ . "/../index.php"); // si no lo mandamos al index
+    header('Location: ../index.php'); // si no lo mandamos al index
     exit();
 }
 
@@ -406,17 +406,19 @@ $servicios = $sql->fetchAll(PDO::FETCH_OBJ);
     </div>
 
     <div class="services-grid">
-        <!-- Servicio 1 -->
+        <?php if (empty($servicios)): ?>
+            <p style="text-align:center; color:#555;">No hay servicios disponibles por el momento.</p>
+        <?php else: ?>
         <?php foreach ($servicios as $item) : ?>
-            <div class="service-card featured" data-category="hair">
+            <div class="service-card featured">
                 <div class="service-image" style="background-image: url('https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');"></div>
                 <div class="service-content">
-                    <h3 class="service-title"><?php echo $item->nombre; ?></h3>
+                    <h3 class="service-title"><?php echo htmlspecialchars($item->nombre);?></h3>
                     <p class="service-description"><?php echo $item->descripcion; ?>.</p>
 
                     <div class="service-details">
                         <div class="service-price">$<?php echo $item->precio; ?></div>
-                        <div class="service-duration"><i class="fas fa-clock"></i> <?php echo $item->duracion; ?> min</div>
+                        <div class="service-duration"><i class="fas fa-clock"></i> <?php echo htmlspecialchars($item->duracion); ?> min</div>
                     </div>
 
                     <ul class="service-features">
@@ -431,6 +433,7 @@ $servicios = $sql->fetchAll(PDO::FETCH_OBJ);
                 </div>
             </div>
         <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 
     <script>
@@ -459,4 +462,4 @@ $servicios = $sql->fetchAll(PDO::FETCH_OBJ);
         });
     </script>
 
-    <?php include_once __DIR__ . '/../templates/footer.php'; ?>
+<?php include_once __DIR__ . '/../templates/footer.php'; ?>

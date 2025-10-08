@@ -480,8 +480,8 @@ $citas = $sql->fetchAll(PDO::FETCH_OBJ);
                         $horasRestantes = ($fechaHoraCita->getTimestamp() - $ahora->getTimestamp()) / 3600;
                     ?>
                         <tr>
-                            <td><?php echo $item->fecha; ?>, <?php echo $item->hora; ?></td>
-                            <td><?php echo $item->servicio; ?></td>
+                            <td><?php echo htmlspecialchars($item->fecha); ?>, <?php echo htmlspecialchars($item->hora); ?></td>
+                            <td><?php echo htmlspecialchars($item->servicio); ?></td>
                             <?php if ($item->estado == 'pendiente') : ?>
                                 <td><span class="status-badge status-pending">Pendiente</span></td>
                             <?php elseif ($item->estado == 'confirmada') : ?>
@@ -491,33 +491,41 @@ $citas = $sql->fetchAll(PDO::FETCH_OBJ);
                             <?php endif; ?>
                             <td>$<?php echo $item->precio; ?></td>
                             <td>
-                                <div class="action-buttons">
+                                <?php
+                                // Combinar fecha y hora de la cita
+                                $fechaHoraCita = new DateTime($item->fecha . ' ' . $item->hora);
+                                $ahora = new DateTime();
+                                $horasRestantes = ($fechaHoraCita->getTimestamp() - $ahora->getTimestamp()) / 3600;
+
+                                // Mostrar botón de reagendar solo si faltan más de 24 horas y la cita no está cancelada
+                                if ($horasRestantes >= 24 && $item->estado != 'cancelada') : ?>
                                     <a href="../cliente/reagendar_cita.php?id_cita=<?php echo $item->id_cita; ?>" class="action-btn btn-reschedule">Reagendar</a>
+                                <?php endif; ?>
 
-                                    <?php
-                                    // Mostrar botón de cancelar solo si faltan más de 24 horas y la cita no está cancelada
-                                    if ($horasRestantes >= 24 && $item->estado != 'cancelada') :
-                                    ?>
-                                        <form action="../controladores/cancelar_cita.php" method="POST" style="display:inline;">
-                                            <input type="hidden" name="id_cita" value="<?php echo $item->id_cita; ?>">
-                                            <button type="submit" class="action-btn btn-cancel">Cancelar</button>
-                                        </form>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-
-            <div class="pagination">
-                <button class="pagination-btn active">1</button>
-                <button class="pagination-btn">2</button>
-                <button class="pagination-btn">3</button>
-                <button class="pagination-btn">Siguiente</button>
-            </div>
+                                <?php
+                                // Mostrar botón de cancelar solo si faltan más de 24 horas y la cita no está cancelada
+                                if ($horasRestantes >= 24 && $item->estado != 'cancelada') :
+                                ?>
+                                    <form action="../controladores/cancelar_cita.php" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id_cita" value="<?php echo $item->id_cita; ?>">
+                                        <button type="submit" class="action-btn btn-cancel">Cancelar</button>
+                                    </form>
+                                <?php endif; ?>
         </div>
+        </td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+    </table>
+
+    <div class="pagination">
+        <button class="pagination-btn active">1</button>
+        <button class="pagination-btn">2</button>
+        <button class="pagination-btn">3</button>
+        <button class="pagination-btn">Siguiente</button>
     </div>
+    </div>
+</div>
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -552,10 +560,21 @@ $citas = $sql->fetchAll(PDO::FETCH_OBJ);
                 let show = true;
 
                 // Estado
+
                 if (status !== 'all') {
                     const rowStatus = row.querySelector('.status-badge').textContent.trim().toLowerCase();
-                    if (rowStatus !== status) show = false;
+
+                    // Normalizamos las comparaciones a minúsculas y sin acentos
+                    const normalize = text => text
+                        .toLowerCase()
+                        .normalize('NFD') // separa acentos
+                        .replace(/[\u0300-\u036f]/g, ''); // los elimina
+
+                    if (normalize(rowStatus) !== normalize(status)) {
+                        show = false;
+                    }
                 }
+
 
                 // Servicio
                 if (service !== 'all') {

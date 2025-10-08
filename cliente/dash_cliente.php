@@ -52,9 +52,15 @@ $ultima_cita = $sql->fetch(PDO::FETCH_OBJ);
             </div>
         </div>
         <div class="card-body">
-            <p><strong>Fecha:</strong> <?= $ultima_cita->fecha; ?></p>
-            <p><strong>Hora:</strong> <?= $ultima_cita->hora; ?></p>
-            <p><strong>Servicio:</strong> <?= $ultima_cita->servicio; ?></p>
+            <?php if ($ultima_cita) : // Verificar si tiene citas este usuario 
+            ?>
+                <p><strong>Fecha:</strong> <?= htmlspecialchars($ultima_cita->fecha); ?></p>
+                <p><strong>Hora:</strong> <?= htmlspecialchars($ultima_cita->hora); ?></p>
+                <p><strong>Servicio:</strong> <?= htmlspecialchars($ultima_cita->servicio); ?></p>
+            <?php else : ?>
+                <p>No tienes citas programadas.</p>
+            <?php endif; ?>
+
         </div>
     </div>
 
@@ -66,9 +72,12 @@ $ultima_cita = $sql->fetch(PDO::FETCH_OBJ);
             </div>
         </div>
         <div class="card-body">
-            <p><strong>Total de Citas:</strong> <?= $total_citas->total; ?></p>
+            <p><strong>Total de Citas:</strong> <?= htmlspecialchars($total_citas->total); ?></p>
             <p><strong>Servicio Favorito:</strong> Corte de Cabello</p>
-            <p><strong>Última Visita:</strong> 20 de Julio, 2023</p>
+            <p>
+                <strong>Última Visita:</strong>
+                <?= $ultima_cita ? htmlspecialchars(date('d/m/Y', strtotime($ultima_cita->fecha))) : 'Sin registros'; ?>
+            </p>
         </div>
     </div>
 </div>
@@ -82,23 +91,27 @@ $ultima_cita = $sql->fetch(PDO::FETCH_OBJ);
         </a>
     </div>
     <div class="card-body">
-        <ul class="appointments-list">
-            <?php foreach ($citas as $item) : ?>
-                <li class="appointment-item">
-                    <div class="appointment-details">
-                        <h4><?php echo $item->servicio; ?></h4>
-                        <p><?php echo $item->fecha; ?> - <?php echo $item->hora; ?></p>
-                    </div>
-                    <?php if($item->estado == 'pendiente') : ?>
-                        <span class="appointment-status status-pending">Pendiente</span>
-                    <?php elseif($item->estado == 'confirmada') : ?>
-                        <span class="appointment-status status-confirmed">Confirmada</span>
-                    <?php elseif($item->estado == 'cancelada') : ?>
-                        <span class="appointment-status status-cancelled">Cancelada</span>
-                    <?php endif; ?>
-                </li>
-            <?php endforeach; ?>
-        </ul>
+        <?php if ($citas) : ?>
+            <ul class="appointments-list">
+                <?php foreach ($citas as $item) : ?>
+                    <li class="appointment-item">
+                        <div class="appointment-details">
+                            <h4><?php echo htmlspecialchars($item->servicio); ?></h4>
+                            <p><?php echo $item->fecha; ?> - <?php echo  htmlspecialchars($item->hora); ?></p>
+                        </div>
+                        <?php if ($item->estado == 'pendiente') : ?>
+                            <span class="appointment-status status-pending">Pendiente</span>
+                        <?php elseif ($item->estado == 'confirmada') : ?>
+                            <span class="appointment-status status-confirmed">Confirmada</span>
+                        <?php elseif ($item->estado == 'cancelada') : ?>
+                            <span class="appointment-status status-cancelled">Cancelada</span>
+                        <?php endif; ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else : ?>
+            <p>No tienes citas registradas.</p>
+        <?php endif; ?>
     </div>
 </div>
 
