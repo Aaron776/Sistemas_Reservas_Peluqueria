@@ -140,11 +140,21 @@ session_start();
         .btn-github {
             background-color: var(--github);
             color: white;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .btn-github:hover {
             background-color: #1a1e22;
+        }
+
+        .btn-facebook {
+            background-color: #1877f2;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .btn-facebook:hover {
+            background-color: #0d65d9;
         }
 
         .divider {
@@ -213,6 +223,12 @@ session_start();
             <a href="controladores/github_login.php" class="btn btn-github">
                 <i class="fab fa-github"></i>
                 Continuar con GitHub
+            </a>
+
+            <!-- Botón de Facebook -->
+            <a href="controladores/facebook_login.php" class="btn btn-facebook">
+                <i class="fab fa-facebook-f"></i>
+                Continuar con Facebook
             </a>
 
             <div class="divider">
