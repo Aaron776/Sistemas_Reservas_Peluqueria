@@ -1,9 +1,12 @@
 <?php
 session_start();
 
-// Configuración de Facebook OAuth
-$app_id = '1400678928112493';
-$redirect_uri = 'http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/controladores/facebook_callback.php';
+// Incluir configuración de entorno
+include_once __DIR__ . '/../config/env.php'; // 🔒 Carga las variables del .env
+
+// Configuración de Facebook OAuth desde .env
+$app_id = $_ENV['FACEBOOK_APP_ID'];
+$redirect_uri = $_ENV['FACEBOOK_REDIRECT_URI'];
 $scope = 'email,public_profile';
 
 // Generar estado para CSRF protection
@@ -19,5 +22,6 @@ $auth_url = "https://www.facebook.com/v18.0/dialog/oauth?" . http_build_query([
     'response_type' => 'code'
 ]);
 
+// Redirigir al usuario a la autenticación de Facebook
 header("Location: $auth_url");
 exit;

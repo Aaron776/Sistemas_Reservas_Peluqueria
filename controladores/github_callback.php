@@ -1,11 +1,12 @@
 <?php
 session_start();
 include_once __DIR__ . '/../conexion/bd.php';
+include_once __DIR__ . '/../config/env.php'; // 🔒 Cargar variables seguras desde .env
 
-// Configuración
-$client_id = 'Ov23liPTRbmmQaT8b8RN';
-$client_secret = 'ece7a56075cb4d1dfb499a74c88c6f5918b33d2a';
-$redirect_uri = 'http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/controladores/github_callback.php';
+// Configuración segura
+$client_id = $_ENV['GITHUB_CLIENT_ID'];
+$client_secret = $_ENV['GITHUB_CLIENT_SECRET'];
+$redirect_uri = $_ENV['GITHUB_REDIRECT_URI'];
 
 // Verificar estado para prevenir CSRF
 if (!isset($_GET['state']) || $_GET['state'] !== $_SESSION['github_oauth_state']) {
@@ -114,7 +115,6 @@ if ($usuario) {
          VALUES (:email, :nombre, :rol, :github_id, :password)"
     );
     
-    // Generar password aleatorio (no se usará pero el campo puede ser requerido)
     $random_password = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
     
     $insert_sql->bindParam(':email', $email, PDO::PARAM_STR);

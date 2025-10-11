@@ -1,12 +1,15 @@
 <?php
 session_start();
 
-// Configuración de GitHub OAuth
-$client_id = 'Ov23liPTRbmmQaT8b8RN';
-$redirect_uri = 'http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/controladores/github_callback.php';
+// Cargar variables de entorno
+require_once __DIR__ . '/../config/env.php'; 
+
+// Configuración de GitHub OAuth desde variables de entorno
+$client_id = $_ENV['GITHUB_CLIENT_ID'];
+$redirect_uri = $_ENV['GITHUB_REDIRECT_URI'];
 $scope = 'user:email';
 
-// Generar estado para CSRF protection
+// Generar estado aleatorio para proteger contra ataques CSRF
 $state = bin2hex(random_bytes(16));
 $_SESSION['github_oauth_state'] = $state;
 
@@ -18,5 +21,6 @@ $auth_url = "https://github.com/login/oauth/authorize?" . http_build_query([
     'state' => $state
 ]);
 
+// Redirigir al usuario a GitHub
 header("Location: $auth_url");
 exit;

@@ -1,13 +1,14 @@
 <?php
 session_start();
 include_once __DIR__ . '/../conexion/bd.php';
+include_once __DIR__ . '/../config/env.php'; // 🔒 Carga las variables seguras
 
-// Configuración
-$app_id = '1400678928112493';
-$app_secret = 'ecf37e5a63c97defef059ccfe92d4c1c';
-$redirect_uri = 'http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/controladores/facebook_callback.php';
+// Configuración segura
+$app_id = $_ENV['FACEBOOK_APP_ID'];
+$app_secret = $_ENV['FACEBOOK_APP_SECRET'];
+$redirect_uri = $_ENV['FACEBOOK_REDIRECT_URI'];
 
-// Verificar estado para prevenir CSRF
+// Verificación del estado CSRF
 if (!isset($_GET['state']) || $_GET['state'] !== $_SESSION['facebook_oauth_state']) {
     $_SESSION['errores'] = ["Error de seguridad en la autenticación con Facebook."];
     header("Location: ../login.php");
