@@ -562,13 +562,13 @@ if (session_status() === PHP_SESSION_NONE) { // Si no hay ninguna sesión activa
         <!-- Footer del sidebar con los botones de acción -->
         <div class="sidebar-footer">
             <div class="sidebar-actions">
-                <a href="http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/cambiar_password.php" class="sidebar-btn">
+                <a href="cambiar_password.php" class="sidebar-btn">
                     <i class="fas fa-lock"></i> Cambiar Contraseña
                 </a>
-                <a href="http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/perfil.php" class="sidebar-btn">
+                <a href="../perfil.php" class="sidebar-btn">
                     <i class="fas fa-user"></i> Mi Perfil
                 </a>
-                <a href="http://localhost/Sistemas_Web_PHP/Sistema_Web_Citas_Peluqueria/controladores/logout.php" class="sidebar-btn">
+                <a href="controladores/logout.php" class="sidebar-btn">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </a>
             </div>
