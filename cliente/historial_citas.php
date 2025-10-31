@@ -497,8 +497,8 @@ $citas = $sql->fetchAll(PDO::FETCH_OBJ);
                                 $ahora = new DateTime();
                                 $horasRestantes = ($fechaHoraCita->getTimestamp() - $ahora->getTimestamp()) / 3600;
 
-                                // Mostrar botón de reagendar solo si faltan más de 24 horas y la cita no está cancelada
-                                if ($horasRestantes >= 24 && $item->estado != 'cancelada') : ?>
+                                // Mostrar botón de reagendar solo si faltan más de 24 horas y la cita está pendiente
+                                if ($horasRestantes >= 24 && $item->estado == 'pendiente') : ?>
                                     <a href="../cliente/reagendar_cita.php?id_cita=<?php echo $item->id_cita; ?>" class="action-btn btn-reschedule">Reagendar</a>
                                 <?php endif; ?>
 

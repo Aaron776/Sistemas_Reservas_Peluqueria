@@ -3,6 +3,25 @@
 if (session_status() === PHP_SESSION_NONE) { // Si no hay ninguna sesión activa
     session_start(); // Inicia una nueva sesión o reanuda la existente
 }
+
+// Calcular la ruta base relativa hacia la raíz del proyecto
+// Obtenemos el archivo que incluye este header
+$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+$including_file = isset($backtrace[0]['file']) ? $backtrace[0]['file'] : __FILE__;
+$including_dir = dirname($including_file);
+$root_dir = dirname(__DIR__); // Directorio raíz del proyecto
+
+// Normalizar las rutas para que funcionen en Windows y Linux
+$including_dir = str_replace('\\', '/', $including_dir);
+$root_dir = str_replace('\\', '/', $root_dir);
+
+// Calcular la ruta relativa desde el directorio del archivo que incluye el header hacia la raíz
+$relative_path = str_replace($root_dir, '', $including_dir);
+$relative_path = trim($relative_path, '/');
+$depth = !empty($relative_path) ? substr_count($relative_path, '/') + 1 : 0;
+
+// Construir la ruta base: si está en cliente/ o admin/, necesitamos "../", si está en la raíz, ""
+$base_url = $depth > 0 ? str_repeat('../', $depth) : '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -517,42 +536,42 @@ if (session_status() === PHP_SESSION_NONE) { // Si no hay ninguna sesión activa
             <div class="sidebar-menu-header">Navegación Principal</div>
 
             <?php if ($_SESSION['rol'] == 'cliente') { ?>
-                <a href="../cliente/dash_cliente.php" class="sidebar-menu-item">
+                <a href="<?php echo $base_url; ?>cliente/dash_cliente.php" class="sidebar-menu-item">
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="../cliente/reservar_cita.php" class="sidebar-menu-item">
+                <a href="<?php echo $base_url; ?>cliente/reservar_cita.php" class="sidebar-menu-item">
                     <i class="fas fa-calendar-plus"></i>
                     <span>Reservar Cita</span>
                 </a>
 
-                <a href="../cliente/historial_citas.php" class="sidebar-menu-item">
+                <a href="<?php echo $base_url; ?>cliente/historial_citas.php" class="sidebar-menu-item">
                     <i class="fas fa-history"></i>
                     <span>Historial de Citas</span>
                 </a>
 
-                <a href="../cliente/servicios_disponibles.php" class="sidebar-menu-item">
+                <a href="<?php echo $base_url; ?>cliente/servicios_disponibles.php" class="sidebar-menu-item">
                     <i class="fas fa-scissors"></i>
                     <span>Servicios</span>
                 </a>
             <?php } elseif ($_SESSION['rol'] == 'admin') { ?>
-                <a href="../admin/dash_admin.php" class="sidebar-menu-item">
+                <a href="<?php echo $base_url; ?>admin/dash_admin.php" class="sidebar-menu-item">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <a href="../admin/gestion_citas.php" class="sidebar-menu-item">
+                <a href="<?php echo $base_url; ?>admin/gestion_citas.php" class="sidebar-menu-item">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Gestión de Citas</span>
                 </a>
 
-                <a href="../admin/gestion_usuarios.php" class="sidebar-menu-item">
+                <a href="<?php echo $base_url; ?>admin/gestion_usuarios.php" class="sidebar-menu-item">
                     <i class="fas fa-users"></i>
                     <span>Gestión de Usuarios</span>
                 </a>
 
-                <a href="../admin/gestion_servicios.php" class="sidebar-menu-item">
+                <a href="<?php echo $base_url; ?>admin/gestion_servicios.php" class="sidebar-menu-item">
                     <i class="fas fa-scissors"></i>
                     <span>Gestión de Servicios</span>
                 </a>
@@ -562,13 +581,13 @@ if (session_status() === PHP_SESSION_NONE) { // Si no hay ninguna sesión activa
         <!-- Footer del sidebar con los botones de acción -->
         <div class="sidebar-footer">
             <div class="sidebar-actions">
-                <a href="cambiar_password.php" class="sidebar-btn">
+                <a href="<?php echo $base_url; ?>cambiar_password.php" class="sidebar-btn">
                     <i class="fas fa-lock"></i> Cambiar Contraseña
                 </a>
-                <a href="../perfil.php" class="sidebar-btn">
+                <a href="<?php echo $base_url; ?>perfil.php" class="sidebar-btn">
                     <i class="fas fa-user"></i> Mi Perfil
                 </a>
-                <a href="controladores/logout.php" class="sidebar-btn">
+                <a href="<?php echo $base_url; ?>controladores/logout.php" class="sidebar-btn">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </a>
             </div>
